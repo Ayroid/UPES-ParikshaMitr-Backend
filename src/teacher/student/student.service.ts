@@ -77,4 +77,52 @@ export class StudentService {
       }
     }
   }
+  async getStudentAttendanceBySapId(sap_id: number) {
+    try {
+      if (!sap_id) {
+        throw new HttpException('SAP ID is required', 400);
+      }
+
+      const room = await this.roomModel.findOne(
+        { 'students.sap_id': sap_id },
+        {
+          'students.$': 1,
+          room_no: 1,
+          block: 1,
+        }
+      );
+
+      if (!room || !room[0]) {
+        throw new HttpException('Student not found', 404);
+      }
+
+      const student = room.students.find((student) => student.sap_id === sap_id);
+
+      if (!student) {
+        throw new HttpException('Student not found', 404);
+      }
+
+      const slot = await this.slotModel.findOne(
+        { rooms: room._id },
+        'date timeSlot type',
+      );
+
+      return {
+        message: 'Student attendance found',
+        data: {
+          sap_id: student.sap_id,
+          attendance: student.attendance,
+          room_no: room.room_no,
+          block: room.block,
+          slot: slot,
+        },
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
+  }
 }

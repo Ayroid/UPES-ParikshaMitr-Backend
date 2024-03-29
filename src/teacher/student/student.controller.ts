@@ -13,4 +13,11 @@ export class StudentController {
   ) {
     return this.studentService.searchStudent(ans_sheet_number);
   }
+  @UseGuards(TeacherJwtGuard)
+  @Get('Search-sap')
+  getStudentAttendanceBySapId(
+    @Query('sap_id') sap_id: number,
+  ) {
+    return this.studentService.getStudentAttendanceBySapId(sap_id);
+  }
 }
