@@ -1,11 +1,10 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards  } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { TeacherJwtGuard } from 'src/guards/teacher-jwt.guard';
 
 @Controller('teacher/student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
-
   @UseGuards(TeacherJwtGuard)
   @Get('search-student')
   searchStudent(
@@ -16,7 +15,7 @@ export class StudentController {
   @UseGuards(TeacherJwtGuard)
   @Get('Search-sap')
   getStudentAttendanceBySapId(
-    @Query('sap_id') sap_id: number,
+    @Query('sap_id') sap_id: string,
   ) {
     return this.studentService.getStudentAttendanceBySapId(sap_id);
   }
