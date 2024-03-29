@@ -50,13 +50,22 @@ export class InvigilationService {
   ) {}
 
   async getSlots() {
+    try{
     return await this.slotModel
       .find()
       .sort({ date: -1, timeSlot: -1 })
       .populate('rooms', 'room_no -_id');
+    }catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
   }
+}
 
   async getSlot(id: string) {
+    try{
     const slot = await (
       await (
         await (await this.slotModel.findById(id)).populate('rooms ufms')
@@ -85,9 +94,17 @@ export class InvigilationService {
     }
 
     return slot;
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async createRoom(createRoomDto: CreateRoomDto) {
+    try{
     const room = new this.roomModel({
       room_no: createRoomDto.roomNo,
       block: createRoomDto.block,
@@ -106,9 +123,17 @@ export class InvigilationService {
     return {
       message: `Created Room No: ${room.room_no}, ID: ${room._id}`,
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async getRoomWithApprovalPendingInvigilator() {
+    try{
     const roomswithPendingInvigilator = await this.roomInvigilatorModel
       .find({
         $or: [
@@ -193,12 +218,20 @@ export class InvigilationService {
       return temp;
     });
     return returnObj;
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async rejectInvigilator(
     approveInvigilatorDto: ApproveInvigilatorDto,
     controllerId: string,
   ) {
+    try{
     const room = await this.roomModel.findById(approveInvigilatorDto.roomId);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -243,12 +276,20 @@ export class InvigilationService {
     return {
       message: 'Invigilator rejected. Name: ' + rejectedInvigilator.name,
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async approveInvigilator(
     approveInvigilatorDto: ApproveInvigilatorDto,
     controllerId: string,
   ) {
+    try{
     const room = await this.roomModel.findById(approveInvigilatorDto.roomId);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -302,9 +343,17 @@ export class InvigilationService {
         invigilator: approvedInvigilator,
       },
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async addStudentToRoom(body: AddStudentDto) {
+    try{
     const room = await this.roomModel.findById(body.room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -328,9 +377,17 @@ export class InvigilationService {
     return {
       message: 'Student added to room',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async createSeatingPlan(body: CreateSeatingPlanDto) {
+    try{
     const roomDoc = await this.roomModel.findById(body.room_id);
     if (!roomDoc) {
       throw new HttpException('Room not found', 404);
@@ -368,9 +425,17 @@ export class InvigilationService {
     return {
       message: 'Seating plan updated',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async editStudentEligibility(body: EditStudentEligibilityDto) {
+    try{
     const roomDoc = await this.roomModel.findById(body.room_id);
     if (!roomDoc) {
       throw new HttpException('Room not found', 404);
@@ -394,9 +459,17 @@ export class InvigilationService {
     return {
       message: 'Student eligibility updated',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
+  }
   }
 
   async createSlot(body: CreateSlotDto) {
+    try{
     // return format(new Date(body.date), 'yyyy-MM-dd');
     const slotExists = await this.slotModel.findOne({
       date: format(new Date(body.date), 'yyyy-MM-dd'),
@@ -418,9 +491,17 @@ export class InvigilationService {
       uniqueCode: randomCode,
     });
     return await slot.save();
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async addRoomToSlot(body: AddRoomToSlotDto) {
+    try{
     const slot = await this.slotModel.findById(body.slotId);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -433,9 +514,17 @@ export class InvigilationService {
       message:
         'Rooms added to slot, Date: ' + slot.date + ', Time: ' + slot.timeSlot,
     };
+  }catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getTotalSupplies(room_id: string) {
+    try{
     const supplies = await this.pendingSuppliesModel.findOne({
       room_id,
     });
@@ -452,9 +541,17 @@ export class InvigilationService {
     });
 
     return { message: 'Total Supplies Info', data: res };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async approveRoomSubmission(room_id: string) {
+    try{
     const room = await this.roomModel.findById(room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -470,9 +567,17 @@ export class InvigilationService {
     return {
       message: 'Room submission approved',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async getContactDetails(slot_id: string) {
+    try{
     const slot = await this.slotModel.findById(slot_id);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -482,9 +587,17 @@ export class InvigilationService {
       message: 'Contact details',
       data: slot.contact,
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async updateContactDetails(body: EditContactDto) {
+    try{
     const slot = await this.slotModel.findById(body.slot_id);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -496,9 +609,18 @@ export class InvigilationService {
     return {
       message: 'Contact details updated',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
+  
 
   async getSupplies(room_id: string) {
+    try{
     const supplies = await this.pendingSuppliesModel.findOne({
       room_id,
     });
@@ -506,17 +628,33 @@ export class InvigilationService {
       throw new HttpException('Supplies not found', 404);
     }
     return supplies;
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async getStudentList(room_id: string) {
+    try{
     const room = await this.roomModel.findById(room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
     }
     return room.students;
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async deleteSlot(slot_id: string) {
+    try{
     const slot = await this.slotModel.findById(slot_id);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -535,9 +673,18 @@ export class InvigilationService {
     return {
       message: 'Slot deleted',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
 
+}
+
   async changeRoomStatus(body: ChangeRoomStatusesDto) {
+    try{
     await this.roomModel.updateMany(
       { _id: { $in: body.room_ids } },
       { status: body.status },
@@ -546,10 +693,18 @@ export class InvigilationService {
     return {
       message: 'Room statuses updated',
     };
+  }catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
+}
 
   async manualAssign(body: ManualAssignDto, contId) {
-    const slot = await this.slotModel.findById(body.slotId);
+    try {
+      const slot = await this.slotModel.findById(body.slotId);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
     }
@@ -634,6 +789,13 @@ export class InvigilationService {
     return {
       message: 'Invigilator assigned to room',
     };
+  }catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async setNumInvigilators(body: SetNumInvigilatorsDto) {
@@ -684,6 +846,7 @@ export class InvigilationService {
   }
 
   async dutySheetUpload(body: DutySheetUploadDto) {
+    try{
     const slot = await this.slotModel.findById(body.slot_id);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -747,6 +910,12 @@ export class InvigilationService {
     return {
       message: 'Duty Sheet uploaded',
     };
+  } catch (err) {
+    if (err instanceof HttpException) {
+      throw err;
+    } else {
+      throw new HttpException(err.message, 400);
+    }
   }
 
   async getRoomsForSlot(slot_id: string) {
@@ -762,4 +931,5 @@ export class InvigilationService {
       data: rooms,
     };
   }
+}
 }

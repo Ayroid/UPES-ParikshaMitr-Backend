@@ -39,6 +39,7 @@ export class InvigilationService {
 
   //TODO: Get Unique Code and Rooms from supertable
   async assignInvigilator(assignInvigilatorDto: AssignInvigilatorDto, id: any) {
+    try{
     const { unique_code } = assignInvigilatorDto;
     const invigilator_id = id;
     if (!invigilator_id) {
@@ -216,10 +217,17 @@ export class InvigilationService {
         invigilator1,
         invigilator2,
       },
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getSupplies(teacher_id: string, room_id: string) {
+    try{
     const invigilator = await this.roomInvigilatorModel.findOne({
       room_id: room_id,
       $or: [
@@ -267,13 +275,20 @@ export class InvigilationService {
 
     const room = await this.roomModel.findById(invigilator.room_id);
 
-    return { message: 'Total Supplies Info', data: [] };
+    return { message: 'Total Supplies Info', data: [] };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async approveInvigilator(
     approveInvigilatorDto: ApproveInvigilatorDto,
     id: any,
   ) {
+    try{
     const invigilatorId = id;
     if (!invigilatorId) {
       throw new HttpException('Unauthorized', 401);
@@ -339,10 +354,17 @@ export class InvigilationService {
 
     return {
       message: 'Teacher Approval Collected',
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async addSupplies(body: UpdateSuppliesDto, teacher_id: any) {
+    try{
     const invigilator = await this.roomInvigilatorModel.findOne({
       room_id: body.room_id,
       $or: [
@@ -417,10 +439,17 @@ export class InvigilationService {
 
     return {
       message: 'Supplies Added',
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async updateSupplies(body: UpdateSuppliesDto, teacher_id: any) {
+    try{
     const invigilator = await this.roomInvigilatorModel.findOne({
       room_id: body.room_id,
       $or: [
@@ -476,10 +505,17 @@ export class InvigilationService {
 
     return {
       message: 'Supplies Updated',
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getSeatingPlan(room_id: string) {
+    try{
     const room = await this.roomModel.findById(room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -541,10 +577,17 @@ export class InvigilationService {
         highest_seat_no: highestSeatNo,
         seating_plan: room.students,
       },
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async markAttendance(body: MarkAttendanceDto, id: any) {
+    try{
     const { room_id, sap_id, ans_sheet_number } = body;
     const invigilator_id = id;
     if (!invigilator_id) {
@@ -605,10 +648,17 @@ export class InvigilationService {
     return {
       message: 'Attendance marked',
       data: room.students[stuIdx],
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async issueBSheet(body: IssueBSheetDto) {
+    try{
     const room: RoomDocument = await this.roomModel.findById(body.room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -634,10 +684,17 @@ export class InvigilationService {
 
     return {
       message: 'B Sheet Issued to ' + student.student_name,
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getBSheet(room_id: string, sap_id: string) {
+    try{
     const room: RoomDocument = await this.roomModel.findById(room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -661,10 +718,17 @@ export class InvigilationService {
         seat_no: student.seat_no,
         b_sheet_count: student.b_sheet_count,
       },
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getStatus(room_id: string) {
+    try{
     const room = await this.roomModel.findById(room_id);
     if (!room) {
       throw new HttpException('Room not found', 404);
@@ -673,10 +737,17 @@ export class InvigilationService {
     return {
       message: 'Invigilation Status',
       data: room.status,
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async submitToController(id: any, body: SubmitControlletDto) {
+    try{
     const unique_code = body.unique_code;
     const invigilator_id = id;
 
@@ -730,10 +801,17 @@ export class InvigilationService {
 
     return {
       message: 'Submitted to Controller',
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getContactDetails(slot_id: string) {
+    try{
     const slot = await this.slotModel.findById(slot_id);
     if (!slot) {
       throw new HttpException('Slot not found', 404);
@@ -742,10 +820,17 @@ export class InvigilationService {
     return {
       message: 'Contact Details',
       data: slot.contact,
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async getInvigilators(room_id) {
+    try{
     const invigilators = await this.roomInvigilatorModel
       .findOne({
         room_id,
@@ -766,10 +851,17 @@ export class InvigilationService {
         inv2: invigilators.invigilator2_id,
         inv3: invigilators.invigilator3_id,
       },
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 
   async approveFlyingVisit(body: ApproveFlyingDto, teacher_id: string) {
+    try{
     const flying_squad = await this.flyingSquadModel.findById(
       body.flying_squad_id,
     );
@@ -812,6 +904,12 @@ export class InvigilationService {
 
     return {
       message: 'Flying Visit Approved',
-    };
+    };}catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 }
