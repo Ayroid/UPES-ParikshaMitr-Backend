@@ -24,6 +24,7 @@ import {
 } from '../../schemas/pending-supplies.schema';
 import { ChangeRoomStatusesDto } from './dto/change-room-statuses.dto';
 import {
+  DeleteInvigilatorDto,
   ManualAssignDto,
   SetNumInvigilatorsDto,
 } from './dto/update-invigilation.dto';
@@ -972,5 +973,61 @@ export class InvigilationService {
       message: 'Rooms fetched successfully',
       data: rooms,
     };
+  }
+
+  async deleteInvigilator(body: DeleteInvigilatorDto) {
+    try {
+      const slot = await this.slotModel.findById(body.slot_id);
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      if (!slot.isDeletable) {
+        throw new HttpException(
+          'Cannot delete invigilator after random assignment started',
+          400,
+        );
+      }
+
+      const roomInv = await this.roomInvigilatorModel.findOne({
+        room_id: body.room_id,
+      });
+
+      if (!roomInv) {
+        throw new HttpException('Room not found', 404);
+      }
+
+      if (roomInv.invigilator1_id?.toString() === body.invigilator_id) {
+        roomInv.invigilator1_id = null;
+        roomInv.invigilator1_assign_time = null;
+        roomInv.invigilator1_controller_approval = false;
+        roomInv.invigilator1_controller_approved_by = null;
+        await roomInv.save();
+      } else if (roomInv.invigilator2_id?.toString() === body.invigilator_id) {
+        roomInv.invigilator2_id = null;
+        roomInv.invigilator2_assign_time = null;
+        roomInv.invigilator2_controller_approval = false;
+        roomInv.invigilator2_controller_approved_by = null;
+        await roomInv.save();
+      } else if (roomInv.invigilator3_id?.toString() === body.invigilator_id) {
+        roomInv.invigilator3_id = null;
+        roomInv.invigilator3_assign_time = null;
+        roomInv.invigilator3_controller_approval = false;
+        roomInv.invigilator3_controller_approved_by = null;
+        await roomInv.save();
+      } else {
+        throw new HttpException('Invigilator not assigned to room', 404);
+      }
+
+      return {
+        message: 'Invigilator deleted from room',
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 }

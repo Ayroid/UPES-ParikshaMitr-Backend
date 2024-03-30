@@ -19,3 +19,12 @@ export class SetNumInvigilatorsDto {
   @IsNumber()
   num_inv: number;
 }
+
+export class DeleteInvigilatorDto {
+  @IsString()
+  invigilator_id: string;
+  @IsString()
+  room_id: string;
+  @IsString()
+  slot_id: string;
+}

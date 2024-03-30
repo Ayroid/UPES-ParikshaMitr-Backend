@@ -26,6 +26,7 @@ import { ExamContGuard } from '../../guards/cont-guard.guard';
 import { EditContactDto } from './dto/edit-contact.dto';
 import { ChangeRoomStatusesDto } from './dto/change-room-statuses.dto';
 import {
+  DeleteInvigilatorDto,
   ManualAssignDto,
   SetNumInvigilatorsDto,
 } from './dto/update-invigilation.dto';
@@ -182,5 +183,11 @@ export class InvigilationController {
   @Get('/rooms')
   getRoomsForSlot(@Query('slot_id') slot_id: string) {
     return this.invigilationService.getRoomsForSlot(slot_id);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Delete('/delete')
+  deleteInvigilator(@Body() body: DeleteInvigilatorDto) {
+    return this.invigilationService.deleteInvigilator(body);
   }
 }
