@@ -523,8 +523,26 @@ export class InvigilationService {
   async addRoomToSlot(body: AddRoomToSlotDto) {
     try {
       const slot = await this.slotModel.findById(body.slotId);
+      const slot_with_rooms = await this.slotModel
+        .findById(body.slotId)
+        .populate('rooms', 'room_no -_id');
       if (!slot) {
         throw new HttpException('Slot not found', 404);
+      }
+
+      for (const roomId of body.roomIds) {
+        const room = await this.roomModel.findById(roomId);
+        if (!room) {
+          throw new HttpException('Room not found', 404);
+        }
+
+        if (
+          (slot_with_rooms.rooms as any).find(
+            (rm) => rm.room_no === room.room_no,
+          )
+        ) {
+          throw new HttpException('Room No. already present in slot', 409);
+        }
       }
 
       (slot.rooms as any).addToSet(...body.roomIds);
