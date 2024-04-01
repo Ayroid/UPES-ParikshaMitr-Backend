@@ -38,7 +38,7 @@ export class Room {
     _id: false,
     type: [
       {
-        sap_id: String,
+        sap_id: Number,
         roll_no: String,
         student_name: String,
         course: String,
