@@ -43,6 +43,18 @@ export class InvigilationController {
   }
 
   @UseGuards(ExamContGuard)
+  @Get('/slot/by-date')
+  getSlotsByDate(@Query('date') date: string) {
+    return this.invigilationService.getSlotsByDate(date);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Get('slot/duty')
+  getDutySheet(@Query('slot_id') slot_id: string) {
+    return this.invigilationService.getDutySheet(slot_id);
+  }
+
+  @UseGuards(ExamContGuard)
   @Get('/slot/:id')
   getSlot(@Param('id') id: string) {
     return this.invigilationService.getSlot(id);

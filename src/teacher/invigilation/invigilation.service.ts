@@ -650,7 +650,7 @@ export class InvigilationService {
       }
 
       const stuIdx = room.students.findIndex(
-        (student) => student.sap_id === sap_id,
+        (student) => student.sap_id == sap_id,
       );
       if (stuIdx === -1) {
         throw new HttpException('Student not found', 404);

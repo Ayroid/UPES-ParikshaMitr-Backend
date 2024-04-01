@@ -1030,4 +1030,57 @@ export class InvigilationService {
       }
     }
   }
+
+  async getSlotsByDate(date: string) {
+    try {
+      const slots = await this.slotModel.find({
+        date: format(new Date(date), 'yyyy-MM-dd'),
+      });
+      return {
+        message: 'Slots fetched successfully',
+        data: slots,
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async getDutySheet(slot_id: string) {
+    try {
+      const slot = await this.slotModel.findById(slot_id);
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      const flying = [];
+
+      for (const f of slot.flying_squad) {
+        const flying_squad = await this.flyingSquadModel
+          .findById(f)
+          .populate('teacher_id');
+        if (!flying_squad) {
+          throw new HttpException('Flying Squad not found', 404);
+        }
+        flying.push({
+          _id: flying_squad._id,
+          teacher: flying_squad.teacher_id,
+          in_time: flying_squad.in_time,
+          out_time: flying_squad.out_time,
+          status: flying_squad.status,
+          rooms_assigned: flying_squad.rooms_assigned,
+          final_remarks: flying_squad.final_remarks,
+        });
+      }
+
+      return {
+        message: 'Duty Sheet fetched successfully',
+        data: {
+          invigilators: slot.inv_duties,
+          flyingSquad: flying,
+        },
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
 }
