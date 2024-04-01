@@ -381,16 +381,20 @@ export class InvigilationService {
       if (room.status === 'COMPLETED') {
         throw new HttpException('Room already Completed', 400);
       }
+      const stu = {
+        ...body.student,
+        seat_no: body.student.seat_no.toUpperCase(),
+      };
 
       if (room.students.find((st) => st.sap_id === body.student.sap_id)) {
         throw new HttpException('Student already exists', 409);
       }
 
-      if (room.students.find((st) => st.seat_no === body.student.seat_no)) {
+      if (room.students.find((st) => st.seat_no === stu.seat_no)) {
         throw new HttpException('Seat already occupied', 409);
       }
 
-      room.students.push(body.student as any);
+      room.students.push(stu as any);
       await room.save();
 
       return {
