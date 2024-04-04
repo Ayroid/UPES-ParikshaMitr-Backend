@@ -8,9 +8,14 @@ export class StudentController {
   @UseGuards(TeacherJwtGuard)
   @Get('search-student')
   searchStudent(
-    @Query('ans_sheet_number') ans_sheet_number: number,
+    @Query('ans_sheet_number') ans_sheet_number: string,
+    @Query('ans_sheet_number') subject: string,
+    @Query('ans_sheet_number') subject_code: string,
+    @Query('ans_sheet_number') course: string,
+    @Query('ans_sheet_number') Slot: string,
+    @Query('ans_sheet_number') sap_id: string
   ) {
-    return this.studentService.searchStudent(ans_sheet_number);
+    return this.studentService.searchStudent(ans_sheet_number, subject, subject_code, course, Slot, sap_id);
   }
   @UseGuards(TeacherJwtGuard)
   @Get('Search-sap')
