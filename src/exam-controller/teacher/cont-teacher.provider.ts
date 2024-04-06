@@ -13,6 +13,11 @@ import {
 } from '../../schemas/room-invigilator.schema';
 import { Room, RoomDocument } from '../../schemas/room.schema';
 import { ChangePasswordDto } from '../dto/change-password.dto';
+import {
+  FlyingSquad,
+  FlyingSquadDocument,
+} from '../../schemas/flying-squad.schema';
+import { format } from 'date-fns';
 
 @Injectable()
 export class ContTeacherService {
@@ -23,6 +28,8 @@ export class ContTeacherService {
     @InjectModel(RoomInvigilator.name)
     private roomInvigilatorModel: Model<RoomInvigilatorDocument>,
     @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
+    @InjectModel(FlyingSquad.name)
+    private flyingSquadModel: Model<FlyingSquadDocument>,
   ) {}
 
   async findApproved() {
@@ -408,5 +415,99 @@ export class ContTeacherService {
     return {
       message: 'Password changed successfully',
     };
+  }
+
+  async getDutyStatus(date: string, timeslot: string) {
+    try {
+      const slot = await this.slotModel.findOne({
+        date: date,
+        timeSlot: timeslot,
+      });
+
+      if (!slot) {
+        throw new HttpException(
+          {
+            message: 'Slot not found',
+          },
+          404,
+        );
+      }
+
+      const flying = await this.flyingSquadModel
+        .find({
+          slot: slot._id,
+        })
+        .populate('teacher_id', 'name sap_id phone email');
+
+      const invigilators_list = slot.inv_duties;
+
+      const res_invigilators = [];
+
+      for (let i = 0; i < invigilators_list.length; i++) {
+        const invigilator = invigilators_list[i];
+        const teacher = await this.teacherModel.findById(invigilator);
+        const inv = await this.roomInvigilatorModel
+          .findOne({
+            room_id: { $in: slot.rooms },
+            $or: [
+              {
+                invigilator1_id: invigilator,
+              },
+              {
+                invigilator2_id: invigilator,
+              },
+              {
+                invigilator3_id: invigilator,
+              },
+            ],
+          })
+          .populate('room_id', 'room_no');
+        res_invigilators.push({
+          Name: teacher.name,
+          sap_id: teacher.sap_id,
+          phone: teacher.phone,
+          email: teacher.email,
+          room: (inv?.room_id as any)?.room_no,
+          inv_id: invigilator,
+          scan_time:
+            inv?.invigilator1_id.toString() == invigilator
+              ? format(inv?.invigilator1_assign_time, 'hh:mm aa')
+              : inv?.invigilator2_id.toString() == invigilator
+              ? format(inv?.invigilator2_assign_time, 'hh:mm aa')
+              : inv?.invigilator3_id.toString() == invigilator
+              ? format(inv?.invigilator3_assign_time, 'hh:mm aa')
+              : null,
+          attendance: !!inv,
+        });
+      }
+
+      return {
+        message: 'Duty status fetched successfully',
+        // data: slot,
+        flying: flying.map((ele) => ({
+          Name: (ele.teacher_id as any)?.name,
+          sap_id: (ele.teacher_id as any)?.sap_id,
+          phone: (ele.teacher_id as any)?.phone,
+          email: (ele.teacher_id as any)?.email,
+          in_time: ele.in_time,
+          out_time: ele.out_time,
+          rooms: ele.rooms_assigned.length,
+          status: ele.status,
+          final_remarks: ele.final_remarks,
+        })),
+        invigilators: res_invigilators,
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new HttpException(
+        {
+          message: 'Something went wrong',
+          error: err.message,
+        },
+        500,
+      );
+    }
   }
 }

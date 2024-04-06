@@ -13,6 +13,10 @@ import {
 import { Room, RoomSchema } from '../../schemas/room.schema';
 import { ExamController } from '../entities/exam-controller.entity';
 import { ExamControllerSchema } from '../../schemas/exam-controller.schema';
+import {
+  FlyingSquad,
+  FlyingSquadSchema,
+} from '../../schemas/flying-squad.schema';
 
 @Module({
   imports: [
@@ -23,6 +27,7 @@ import { ExamControllerSchema } from '../../schemas/exam-controller.schema';
       { name: Slot.name, schema: SlotSchema },
       { name: RoomInvigilator.name, schema: RoomInvigilatorSchema },
       { name: Room.name, schema: RoomSchema },
+      { name: FlyingSquad.name, schema: FlyingSquadSchema },
     ]),
 
     JwtModule.registerAsync({

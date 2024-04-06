@@ -88,7 +88,7 @@ export class InvigilationService {
       }
 
       if (!curr_slot.inv_duties.includes(invigilator_id)) {
-        curr_slot.updateOne({ $addToSet: { inv_duties: invigilator_id } });
+        curr_slot.inv_duties.push(invigilator_id);
         await curr_slot.save();
       }
 

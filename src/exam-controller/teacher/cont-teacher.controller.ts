@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ContTeacherService } from './cont-teacher.provider';
@@ -83,5 +84,14 @@ export class ContTeacherController {
   @Post('change-password')
   changePassword(@Body() body: ChangePasswordDto) {
     return this.contTeacherService.changePassword(body);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Get('duty-status')
+  getDutyStatus(
+    @Query('date') date: string,
+    @Query('timeslot') timeslot: string,
+  ) {
+    return this.contTeacherService.getDutyStatus(date, timeslot);
   }
 }

@@ -154,19 +154,19 @@ export class UfmService {
             });
 
           r.slot.ufms[slot.ufms.indexOf(ufm)].new_ans_sheet_number =
-            room.students[0].new_ans_sheet_number;
+            room.students[0]?.new_ans_sheet_number;
 
           r.slot.ufms[slot.ufms.indexOf(ufm)].old_ans_sheet_number =
-            room.students[0].ans_sheet_number;
+            room.students[0]?.ans_sheet_number;
 
           r.slot.ufms[slot.ufms.indexOf(ufm)].student = {
             ...r.slot.ufms[slot.ufms.indexOf(ufm)].student,
-            roll_no: room.students[0].roll_no,
-            course: room.students[0].course,
+            roll_no: room.students[0]?.roll_no,
+            course: room.students[0]?.course,
             exam_type: room.students[0].exam_type,
-            subject: room.students[0].subject,
-            subject_code: room.students[0].subject_code,
-            seat_no: room.students[0].seat_no,
+            subject: room.students[0]?.subject,
+            subject_code: room.students[0]?.subject_code,
+            seat_no: room.students[0]?.seat_no,
           };
         }
         res.push(r);
