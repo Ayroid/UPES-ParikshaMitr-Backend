@@ -1,4 +1,4 @@
-import { Injectable,HttpException, Inject, Logger } from '@nestjs/common';
+import { Injectable, HttpException, Inject, Logger } from '@nestjs/common';
 import { CreateFlyingDto } from './dto/create_flying.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -18,18 +18,19 @@ export class FlyingService {
   ) {}
 
   async create(body: CreateFlyingDto) {
-    try{
-    const flyingSquad = new this.flyingSquadModel({
-      teacher_id: body.teacher_id,
-      slot: body.slot_id,
-    });
-    await flyingSquad.save();
-    const slot = await this.slotModel.findById(body.slot_id);
-    slot.flying_squad.push(flyingSquad._id.toString());
-    await slot.save();
-    return {
-      message: 'Flying squad member added successfully',
-    };}catch (err) {
+    try {
+      const flyingSquad = new this.flyingSquadModel({
+        teacher_id: body.teacher_id,
+        slot: body.slot_id,
+      });
+      await flyingSquad.save();
+      const slot = await this.slotModel.findById(body.slot_id);
+      slot.flying_squad.push(flyingSquad._id.toString());
+      await slot.save();
+      return {
+        message: 'Flying squad member added successfully',
+      };
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
@@ -39,34 +40,35 @@ export class FlyingService {
   }
 
   async assignRooms(body: AssignRoomsDto) {
-    try{
-    const flyingSquad = await this.flyingSquadModel.findById(
-      body.flying_squad_id,
-    );
-    if (!flyingSquad) {
-      return {
-        message: 'Flying squad member not found',
-      };
-    }
-    if ((flyingSquad.rooms_assigned.length as any) == 0) {
-      flyingSquad.rooms_assigned = body.room_ids.map((room) => ({
-        room_id: room,
-        status: 'assigned',
-      })) as any;
-    } else {
-      (flyingSquad.rooms_assigned as any) = [
-        ...flyingSquad.rooms_assigned,
-        ...(body.room_ids.map((room) => ({
+    try {
+      const flyingSquad = await this.flyingSquadModel.findById(
+        body.flying_squad_id,
+      );
+      if (!flyingSquad) {
+        return {
+          message: 'Flying squad member not found',
+        };
+      }
+      if ((flyingSquad.rooms_assigned.length as any) == 0) {
+        flyingSquad.rooms_assigned = body.room_ids.map((room) => ({
           room_id: room,
           status: 'assigned',
-        })) as any),
-      ];
-    }
+        })) as any;
+      } else {
+        (flyingSquad.rooms_assigned as any) = [
+          ...flyingSquad.rooms_assigned,
+          ...(body.room_ids.map((room) => ({
+            room_id: room,
+            status: 'assigned',
+          })) as any),
+        ];
+      }
 
-    await flyingSquad.save();
-    return {
-      message: 'Rooms assigned successfully',
-    };}catch (err) {
+      await flyingSquad.save();
+      return {
+        message: 'Rooms assigned successfully',
+      };
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
@@ -76,16 +78,43 @@ export class FlyingService {
   }
 
   async getBySlot(slot_id: string) {
-    try{
-    return await this.flyingSquadModel
-      .find({ slot: slot_id })
-      .populate('rooms_assigned.room_id', 'room_no')
-      .populate('teacher_id', 'name sap_id email phone');}catch (err) {
-        if (err instanceof HttpException) {
-          throw err;
-        } else {
-          throw new HttpException(err.message, 400);
-        }
+    try {
+      return await this.flyingSquadModel
+        .find({ slot: slot_id })
+        .populate('rooms_assigned.room_id', 'room_no')
+        .populate('teacher_id', 'name sap_id email phone');
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
       }
+    }
+  }
+
+  async completeDuty(body: CreateFlyingDto) {
+    try {
+      const flyingSquad = await this.flyingSquadModel.findOne({
+        teacher_id: body.teacher_id,
+        slot: body.slot_id,
+      });
+      if (!flyingSquad) {
+        return {
+          message: 'Flying squad member not found',
+        };
+      }
+      flyingSquad.out_time = new Date();
+      flyingSquad.status = 'completed';
+      await flyingSquad.save();
+      return {
+        message: 'Duty completed successfully',
+      };
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(err.message, 400);
+      }
+    }
   }
 }

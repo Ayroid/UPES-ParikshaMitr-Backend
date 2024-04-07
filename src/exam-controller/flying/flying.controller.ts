@@ -21,4 +21,9 @@ export class FlyingController {
   getBySlot(@Query('slot_id') slot_id: string) {
     return this.flyingService.getBySlot(slot_id);
   }
+
+  @Post('complete-duty')
+  completeDuty(@Body() body: CreateFlyingDto) {
+    return this.flyingService.completeDuty(body);
+  }
 }
