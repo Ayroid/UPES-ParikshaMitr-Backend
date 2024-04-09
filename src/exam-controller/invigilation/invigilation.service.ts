@@ -752,12 +752,12 @@ export class InvigilationService {
       if (!slot) {
         throw new HttpException('Slot not found', 404);
       }
-      if (!slot.isDeletable) {
-        throw new HttpException(
-          'Manual assignment of invigilator not allowed after random assignment started',
-          400,
-        );
-      }
+      // if (!slot.isDeletable) {
+      //   throw new HttpException(
+      //     'Manual assignment of invigilator not allowed after random assignment started',
+      //     400,
+      //   );
+      // }
 
       const check_flying = await this.flyingSquadModel.findOne({
         teacher_id: body.invigilatorId,
