@@ -649,6 +649,22 @@ export class InvigilationService {
         throw new HttpException('Room not found', 404);
       }
 
+      const ans_search = await this.roomModel.findOne(
+        { 'students.ans_sheet_number': ans_sheet_number },
+        {
+          students: {
+            $elemMatch: { ans_sheet_number },
+          },
+          room_no: 1,
+          room_invigilator_id: 1,
+          block: 1,
+        },
+      );
+      //return ans_search;
+      if (ans_search) {
+        throw new HttpException('Answer Sheet No. already allotted ', 404);
+      }
+
       const stuIdx = room.students.findIndex(
         (student) => student.sap_id == sap_id,
       );
