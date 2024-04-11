@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { CopyDistributionService } from './copy-distribution.service';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 
@@ -11,5 +11,10 @@ export class CopyDistributionController {
   @Post('add-bundles')
   async addBundles(@Body() addBundlesDto: AddBundlesDto) {
     return this.copyDistributionService.addBundles(addBundlesDto);
+  }
+
+  @Get('all-bundles')
+  async allBundles() {
+    return this.copyDistributionService.allBundles();
   }
 }

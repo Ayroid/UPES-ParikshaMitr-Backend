@@ -30,12 +30,12 @@ export class CopyDistributionService {
     // Test the date string against the regular expression.
     if (!regex.test(addBundledto.dateOfExam)) {
       // The date string is in the dd/mm/yyyy format.
-      return {
-        message:
-          'Invalid date format for bundle ' +
+      throw new HttpException(
+        'Invalid date format for bundle ' +
           addBundledto.dateOfExam +
           '. Please use dd/mm/yyyy format.',
-      };
+        400,
+      );
     }
 
     // Split the date string into an array using the "/" character as the delimiter.
@@ -102,5 +102,11 @@ export class CopyDistributionService {
     return {
       message: 'CopyBundle added successfully',
     };
+  }
+
+  //#region Get All Bundles
+  async allBundles() {
+    const bundles = await this.copyBundleModel.find().populate('evaluator');
+    return bundles;
   }
 }
