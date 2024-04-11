@@ -27,32 +27,33 @@ export class ExamControllerService {
   ) {}
 
   async create(createExamControllerDto: CreateExamControllerDto) {
-    try{
-    const examControllerData = await this.examControllerModel.findOne({
-      username: createExamControllerDto.username,
-    });
-    if (examControllerData) {
-      throw new HttpException(
-        {
-          message: 'Username already exists',
-        },
-        400,
+    try {
+      const examControllerData = await this.examControllerModel.findOne({
+        username: createExamControllerDto.username,
+      });
+      if (examControllerData) {
+        throw new HttpException(
+          {
+            message: 'Username already exists',
+          },
+          400,
+        );
+      }
+
+      const pass_hash = await bcrypt.hash(createExamControllerDto.password, 10);
+      createExamControllerDto.password = pass_hash;
+
+      const createdController = new this.examControllerModel(
+        createExamControllerDto,
       );
-    }
-
-    const pass_hash = await bcrypt.hash(createExamControllerDto.password, 10);
-    createExamControllerDto.password = pass_hash;
-
-    const createdController = new this.examControllerModel(
-      createExamControllerDto,
-    );
-    createdController.save();
-    return {
-      message: 'ExamController created successfully',
-      data: {
-        name: createdController.name,
-      },
-    };}catch (err) {
+      createdController.save();
+      return {
+        message: 'ExamController created successfully',
+        data: {
+          name: createdController.name,
+        },
+      };
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
@@ -62,42 +63,43 @@ export class ExamControllerService {
   }
 
   async login(examController: LoginExamControllerDto) {
-    try{
-    const examControllerData = await this.examControllerModel.findOne({
-      username: examController.username,
-    });
-    if (examControllerData) {
-      const match = await bcrypt.compare(
-        examController.password,
-        examControllerData.password,
-      );
-      if (match) {
-        const payload = {
-          id: examControllerData._id,
-          username: examControllerData.username,
-          name: examControllerData.name,
-          role: 'exam-controller',
-        };
-        return {
-          message: 'Login successful',
-          token: await this.jwtService.signAsync(payload),
-        };
+    try {
+      const examControllerData = await this.examControllerModel.findOne({
+        username: examController.username,
+      });
+      if (examControllerData) {
+        const match = await bcrypt.compare(
+          examController.password,
+          examControllerData.password,
+        );
+        if (match) {
+          const payload = {
+            id: examControllerData._id,
+            username: examControllerData.username,
+            name: examControllerData.name,
+            role: 'exam-controller',
+          };
+          return {
+            message: 'Login successful',
+            token: await this.jwtService.signAsync(payload),
+          };
+        } else {
+          throw new HttpException(
+            {
+              message: 'Wrong password',
+            },
+            401,
+          );
+        }
       } else {
         throw new HttpException(
           {
-            message: 'Wrong password',
+            message: 'User not found',
           },
-          401,
+          404,
         );
       }
-    } else {
-      throw new HttpException(
-        {
-          message: 'User not found',
-        },
-        404,
-      );
-    }}catch (err) {
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
@@ -107,16 +109,17 @@ export class ExamControllerService {
   }
 
   async getNotifications() {
-    try{
-    const notifications = await this.notificationModel
-      .find()
-      .populate('sender', 'name');
-    return {
-      message: 'Notifications fetched successfully',
-      data: {
-        notifications,
-      },
-    };}catch (err) {
+    try {
+      const notifications = await this.notificationModel
+        .find()
+        .populate('sender', 'name');
+      return {
+        message: 'Notifications fetched successfully',
+        data: {
+          notifications,
+        },
+      };
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
@@ -129,18 +132,19 @@ export class ExamControllerService {
     notificationData: CreateNotificationDto,
     userId: string,
   ) {
-    try{
-    const createdNotification = new this.notificationModel({
-      ...notificationData,
-      sender: userId,
-    });
-    await createdNotification.save();
-    return {
-      message: 'Notification created successfully',
-      data: {
-        createdNotification,
-      },
-    };}catch (err) {
+    try {
+      const createdNotification = new this.notificationModel({
+        ...notificationData,
+        sender: userId,
+      });
+      await createdNotification.save();
+      return {
+        message: 'Notification created successfully',
+        data: {
+          createdNotification,
+        },
+      };
+    } catch (err) {
       if (err instanceof HttpException) {
         throw err;
       } else {
