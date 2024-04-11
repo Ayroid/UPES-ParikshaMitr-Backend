@@ -50,6 +50,7 @@ export class InvigilationService {
     private flyingSquadModel: Model<FlyingSquadDocument>,
   ) {}
 
+  //#region Get All Slots
   async getSlots() {
     try {
       return await this.slotModel
@@ -65,6 +66,7 @@ export class InvigilationService {
     }
   }
 
+  //#region Get Slot by ID
   async getSlot(id: string) {
     try {
       const slot = await (
@@ -104,6 +106,7 @@ export class InvigilationService {
     }
   }
 
+  //#region Create Room
   async createRoom(createRoomDto: CreateRoomDto) {
     try {
       const room = new this.roomModel({
@@ -1082,6 +1085,34 @@ export class InvigilationService {
           invigilators: slot.inv_duties,
           flyingSquad: flying,
         },
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async getFreeTeachers(slot_id: string) {
+    try {
+      const slot = await this.slotModel
+        .findById(slot_id)
+        .populate('flying_squad');
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      const freeTeachers = await this.teacherModel.find({
+        // Not in slot.inv_duties and not in slot.flying_squad
+        _id: {
+          $nin: [
+            ...slot.inv_duties,
+            ...(slot.flying_squad as any).map((ele) => ele.teacher_id),
+          ],
+        },
+      });
+
+      return {
+        message: 'Free Teachers fetched successfully',
+        data: freeTeachers,
       };
     } catch (err) {
       throw new HttpException(err.message, 400);

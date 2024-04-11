@@ -202,4 +202,10 @@ export class InvigilationController {
   deleteInvigilator(@Body() body: DeleteInvigilatorDto) {
     return this.invigilationService.deleteInvigilator(body);
   }
+
+  @UseGuards(ExamContGuard)
+  @Get('/free-teachers')
+  getFreeTeachers(@Query('slot_id') slot_id: string) {
+    return this.invigilationService.getFreeTeachers(slot_id);
+  }
 }
