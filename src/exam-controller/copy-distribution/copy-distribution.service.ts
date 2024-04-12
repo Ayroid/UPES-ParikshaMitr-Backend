@@ -109,4 +109,20 @@ export class CopyDistributionService {
     const bundles = await this.copyBundleModel.find().populate('evaluator');
     return bundles;
   }
+
+  //#region Get Bundle By Id
+  async getBundle(id: string) {
+    try {
+      const bundle = await this.copyBundleModel
+        .findById(id)
+        .populate('evaluator')
+        .exec();
+      return bundle;
+    } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
+      throw new HttpException(e.message, 400);
+    }
+  }
 }

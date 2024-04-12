@@ -12,6 +12,7 @@ import {
 } from '../schemas/notification.schema';
 import { FlyingModule } from './flying/flying.module';
 import { StudentModule } from './student/student.module';
+import { CopyDistributionModule } from './copy-distribution/copy-distribution.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { StudentModule } from './student/student.module';
     InvigilationModule,
     FlyingModule,
     StudentModule,
+    CopyDistributionModule,
   ],
   controllers: [TeacherController],
   providers: [TeacherService],
