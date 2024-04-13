@@ -34,6 +34,7 @@ import {
   FlyingSquad,
   FlyingSquadDocument,
 } from '../../schemas/flying-squad.schema';
+import { AddDutyDto } from './dto/create-invigilation.dto';
 
 @Injectable()
 export class InvigilationService {
@@ -1112,7 +1113,100 @@ export class InvigilationService {
 
       return {
         message: 'Free Teachers fetched successfully',
-        data: freeTeachers,
+        data: freeTeachers.map((teacher) => {
+          return {
+            _id: teacher._id,
+            sap_id: teacher.sap_id,
+            name: teacher.name,
+            phone: teacher.phone,
+            email: teacher.email,
+          };
+        }),
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async getInvigilatorsInSlot(slot_id: string) {
+    try {
+      const slot = await this.slotModel.findById(slot_id);
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      const invigilators: any = await this.teacherModel
+        .find({
+          _id: { $in: slot.inv_duties },
+        })
+        .select('sap_id name phone email');
+
+      return {
+        message: 'Invigilators fetched successfully',
+        data: invigilators.map((inv) => {
+          return {
+            _id: inv._id,
+            sap_id: inv.sap_id,
+            name: inv.name,
+            phone: inv.phone,
+            email: inv.email,
+          };
+        }),
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async addDuty(body: AddDutyDto) {
+    try {
+      const slot = await this.slotModel.findById(body.slot_id);
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      const teacher = await this.teacherModel.findById(body.teacher_id);
+      if (!teacher) {
+        throw new HttpException('Teacher not found', 404);
+      }
+
+      if (slot.inv_duties.includes(body.teacher_id)) {
+        throw new HttpException('Teacher already assigned', 409);
+      }
+
+      slot.inv_duties.push(body.teacher_id);
+      await slot.save();
+
+      return {
+        message: 'Duty added successfully',
+      };
+    } catch (err) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async removeDuty(body: AddDutyDto) {
+    try {
+      const slot = await this.slotModel.findById(body.slot_id);
+      if (!slot) {
+        throw new HttpException('Slot not found', 404);
+      }
+
+      const teacher = await this.teacherModel.findById(body.teacher_id);
+      if (!teacher) {
+        throw new HttpException('Teacher not found', 404);
+      }
+
+      const idx = slot.inv_duties.indexOf(body.teacher_id);
+      if (idx === -1) {
+        throw new HttpException('Teacher not assigned', 404);
+      }
+
+      slot.inv_duties.splice(idx, 1);
+      await slot.save();
+
+      return {
+        message: 'Duty removed successfully',
       };
     } catch (err) {
       throw new HttpException(err.message, 400);

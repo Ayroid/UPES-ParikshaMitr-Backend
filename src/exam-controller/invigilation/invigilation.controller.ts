@@ -31,6 +31,7 @@ import {
   SetNumInvigilatorsDto,
 } from './dto/update-invigilation.dto';
 import { DutySheetUploadDto } from './dto/duty-sheet-upload.dto';
+import { AddDutyDto } from './dto/create-invigilation.dto';
 
 @Controller('exam-controller/invigilation')
 export class InvigilationController {
@@ -207,5 +208,23 @@ export class InvigilationController {
   @Get('/free-teachers')
   getFreeTeachers(@Query('slot_id') slot_id: string) {
     return this.invigilationService.getFreeTeachers(slot_id);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Get('/inv-in-slot')
+  getInvigilatorsInSlot(@Query('slot_id') slot_id: string) {
+    return this.invigilationService.getInvigilatorsInSlot(slot_id);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Patch('/add-duty')
+  addDuty(@Body() body: AddDutyDto) {
+    return this.invigilationService.addDuty(body);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Patch('/remove-duty')
+  removeDuty(@Body() body: AddDutyDto) {
+    return this.invigilationService.removeDuty(body);
   }
 }
