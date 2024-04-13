@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Teacher, TeacherDocument } from '../../schemas/teacher.schema';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { addDays, differenceInDays, format, isSunday } from 'date-fns';
+import { ProgressBundleDto } from './dto/progess-bundle.dto';
 
 @Injectable()
 export class CopyDistributionService {
@@ -192,5 +193,51 @@ export class CopyDistributionService {
       }
       throw new HttpException(e.message, 400);
     }
+  }
+
+  //#region Progress Bundle
+  async progressBundle(progressBundleDto: ProgressBundleDto) {
+    const bundle = await this.copyBundleModel.findById(
+      progressBundleDto.bundle_id,
+    );
+
+    if (!bundle) {
+      return {
+        message: 'Bundle not found',
+      };
+    }
+
+    const batchIndex = bundle.copies.findIndex(
+      (copy) =>
+        copy.batch === progressBundleDto.batch &&
+        copy.program === progressBundleDto.program,
+    );
+
+    const batch = bundle.copies[batchIndex];
+
+    if (!batch) {
+      return {
+        message: 'Batch not found',
+      };
+    }
+
+    if (batch.status === 'SUBMITTED') {
+      return {
+        message: 'Bundle already submitted',
+      };
+    } else if (batch.status === 'ALLOTED') {
+      batch.status = 'INPROGRESS';
+      batch.start_date = format(new Date(), 'yyyy-MM-dd');
+    } else if (batch.status === 'INPROGRESS') {
+      batch.status = 'SUBMITTED';
+      batch.submit_date = format(new Date(), 'yyyy-MM-dd');
+    }
+
+    bundle.copies[batchIndex] = batch;
+    bundle.save();
+
+    return {
+      message: 'Bundle progressed successfully',
+    };
   }
 }

@@ -39,6 +39,7 @@ export class CopyBundle {
           default: format(new Date(), 'yyyy-MM-dd'),
         },
         start_date: { type: String, default: null },
+        submit_date: { type: String, default: null },
       },
     ],
   })
@@ -50,6 +51,7 @@ export class CopyBundle {
       status?: string;
       allotted_date?: string;
       start_date?: string;
+      submit_date?: string;
     },
   ];
 }

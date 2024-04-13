@@ -57,7 +57,7 @@ export class InvigilationService {
       return await this.slotModel
         .find()
         .sort({ date: -1, timeSlot: -1 })
-        .populate('rooms', 'room_no -_id');
+        .populate('rooms', 'room_no status -_id');
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -1195,6 +1195,22 @@ export class InvigilationService {
       const teacher = await this.teacherModel.findById(body.teacher_id);
       if (!teacher) {
         throw new HttpException('Teacher not found', 404);
+      }
+
+      //Check if teacher is assigned to a room in the slot
+      const rooms = await this.roomModel.find({ _id: { $in: slot.rooms } });
+
+      const roomInv = await this.roomInvigilatorModel.findOne({
+        room_id: { $in: rooms },
+        $or: [
+          { invigilator1_id: body.teacher_id },
+          { invigilator2_id: body.teacher_id },
+          { invigilator3_id: body.teacher_id },
+        ],
+      });
+
+      if (roomInv) {
+        throw new HttpException('Teacher assigned to room in the slot', 403);
       }
 
       const idx = slot.inv_duties.indexOf(body.teacher_id);

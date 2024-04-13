@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -10,6 +11,7 @@ import {
 import { CopyDistributionService } from './copy-distribution.service';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { ExamContGuard } from '../../guards/cont-guard.guard';
+import { ProgressBundleDto } from './dto/progess-bundle.dto';
 
 @Controller('exam-controller/copy-distribution')
 export class CopyDistributionController {
@@ -33,5 +35,11 @@ export class CopyDistributionController {
   @Get('bundle-by-id')
   async getBundle(@Query('bundle_id') id: string) {
     return this.copyDistributionService.getBundle(id);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Patch('progress-bundle')
+  async progressBundle(@Body() progressBundleDto: ProgressBundleDto) {
+    return this.copyDistributionService.progressBundle(progressBundleDto);
   }
 }
