@@ -6,3 +6,8 @@ export class CreateFlyingDto {
   @IsString()
   slot_id: string;
 }
+
+export class DeleteFlyingDto {
+  @IsString()
+  flying_id: string;
+}

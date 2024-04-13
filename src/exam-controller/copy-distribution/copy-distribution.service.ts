@@ -173,6 +173,7 @@ export class CopyDistributionService {
               : c.status,
           allotted_date: c.allotted_date,
           start_date: c.start_date,
+          submit_date: c.submit_date,
           // Due in days (7 working days from start date)
           due_in:
             start_date && c.status != 'SUBMITTED'
