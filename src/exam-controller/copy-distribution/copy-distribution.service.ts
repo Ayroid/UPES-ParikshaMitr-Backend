@@ -4,7 +4,7 @@ import { CopyBundle, CopyBundleDocument } from '../../schemas/sheet-bundle';
 import { Model } from 'mongoose';
 import { Teacher, TeacherDocument } from '../../schemas/teacher.schema';
 import { AddBundlesDto } from './dto/add-bundles.dto';
-import { format } from 'date-fns';
+import { addDays, differenceInDays, format, isSunday } from 'date-fns';
 
 @Injectable()
 export class CopyDistributionService {
@@ -112,12 +112,80 @@ export class CopyDistributionService {
 
   //#region Get Bundle By Id
   async getBundle(id: string) {
+    function getNextWorkingDay(date) {
+      const nextDay = addDays(date, 1);
+      if (isSunday(nextDay)) {
+        return getNextWorkingDay(nextDay);
+      }
+      return nextDay;
+    }
+
+    function getWorkingDateAfterDays(startDate, workingDays) {
+      let currentDate = startDate;
+      for (let i = 1; i < workingDays; i++) {
+        currentDate = getNextWorkingDay(currentDate);
+      }
+      return currentDate;
+    }
     try {
       const bundle = await this.copyBundleModel
         .findById(id)
         .populate('evaluator')
         .exec();
-      return bundle;
+
+      const res_obj = [];
+
+      const t = {
+        _id: bundle._id,
+        date_of_exam: bundle.date_of_exam,
+        evaluation_mode: bundle.evaluation_mode,
+        evaluator: {
+          sap_id: (bundle.evaluator as any).sap_id,
+          name: (bundle.evaluator as any).name,
+          email: (bundle.evaluator as any).email,
+          phone: (bundle.evaluator as any).phone,
+        },
+        subject_code: bundle.subject_code,
+        subject_name: bundle.subject_name,
+        copies: [],
+      };
+      for (const c of bundle.copies) {
+        const start_date = c.start_date;
+        const due_date = start_date
+          ? getWorkingDateAfterDays(new Date(start_date), 7)
+          : null;
+        const day_diff = differenceInDays(
+          due_date,
+          new Date(format(new Date(), 'yyyy-MM-dd')),
+        );
+
+        t.copies.push({
+          _id: (c as any)._id,
+          batch: c.batch,
+          no_of_students: c.no_of_students,
+          program: c.program,
+          status:
+            c.status == 'SUBMITTED'
+              ? c.status
+              : day_diff < 0
+              ? 'OVERDUE'
+              : c.status,
+          allotted_date: c.allotted_date,
+          start_date: c.start_date,
+          // Due in days (7 working days from start date)
+          due_in:
+            start_date && c.status != 'SUBMITTED'
+              ? day_diff > 0
+                ? `Due in ${day_diff} days`
+                : day_diff == 0
+                ? 'Due Today'
+                : `Overdue by ${Math.abs(day_diff)} days`
+              : null,
+        });
+      }
+      res_obj.push(t);
+
+      return res_obj;
     } catch (e) {
       if (e instanceof HttpException) {
         throw e;
