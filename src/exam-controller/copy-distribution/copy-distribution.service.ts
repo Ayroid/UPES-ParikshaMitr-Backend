@@ -6,6 +6,8 @@ import { Teacher, TeacherDocument } from '../../schemas/teacher.schema';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { addDays, differenceInDays, format, isSunday } from 'date-fns';
 import { ProgressBundleDto } from './dto/progess-bundle.dto';
+import { Slot, SlotDocument } from '../../schemas/slot.schema';
+import { Room, RoomDocument } from '../../schemas/room.schema';
 
 @Injectable()
 export class CopyDistributionService {
@@ -13,6 +15,8 @@ export class CopyDistributionService {
     @InjectModel(CopyBundle.name)
     private copyBundleModel: Model<CopyBundleDocument>,
     @InjectModel(Teacher.name) private teacherModel: Model<TeacherDocument>,
+    @InjectModel(Slot.name) private slotModel: Model<SlotDocument>,
+    @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
   ) {}
 
   //#region Add New Bundles
@@ -55,6 +59,21 @@ export class CopyDistributionService {
     const date = new Date(year, month - 1, day);
 
     const exam_date = format(date, 'yyyy-MM-dd');
+
+    const slot = await this.slotModel.find({
+      date: exam_date,
+    });
+
+    const allRooms = slot.map((s) => s.rooms).flat();
+
+    const rooms = await this.roomModel.find({
+      _id: { $in: allRooms },
+      'students.subject_code': addBundledto.subjectCode,
+    });
+
+    if (rooms.length === 0) {
+      throw new HttpException('Exam not registered in slots', 400);
+    }
 
     const prev_bundle = await this.copyBundleModel.findOne({
       date_of_exam: exam_date,
@@ -174,6 +193,7 @@ export class CopyDistributionService {
           allotted_date: c.allotted_date,
           start_date: c.start_date,
           submit_date: c.submit_date,
+          available_date: c.available_date,
           // Due in days (7 working days from start date)
           due_in:
             start_date && c.status != 'SUBMITTED'
@@ -223,12 +243,12 @@ export class CopyDistributionService {
     }
 
     if (batch.status === 'SUBMITTED') {
-      return {
-        message: 'Bundle already submitted',
-      };
-    } else if (batch.status === 'ALLOTED') {
-      batch.status = 'INPROGRESS';
-      batch.start_date = format(new Date(), 'yyyy-MM-dd');
+      throw new HttpException('Bundle already submitted', 400);
+    } else if (batch.status === 'ALLOTTED') {
+      throw new HttpException('Awaiting Teacher to Accept allotment', 400);
+    } else if (batch.status === 'AVAILABLE') {
+      batch.status = 'ALLOTTED';
+      batch.allotted_date = format(new Date(), 'yyyy-MM-dd');
     } else if (batch.status === 'INPROGRESS') {
       batch.status = 'SUBMITTED';
       batch.submit_date = format(new Date(), 'yyyy-MM-dd');
@@ -239,6 +259,50 @@ export class CopyDistributionService {
 
     return {
       message: 'Bundle progressed successfully',
+    };
+  }
+
+  async acceptBundle(progressBundleDto: ProgressBundleDto, teacher_id: string) {
+    const bundle = await this.copyBundleModel.findById(
+      progressBundleDto.bundle_id,
+    );
+
+    if (!bundle) {
+      return {
+        message: 'Bundle not found',
+      };
+    }
+
+    if (bundle.evaluator.toString() !== teacher_id) {
+      throw new HttpException('Bundle Not Alloted to Teacher', 401);
+    }
+
+    const batchIndex = bundle.copies.findIndex(
+      (copy) =>
+        copy.batch === progressBundleDto.batch &&
+        copy.program === progressBundleDto.program,
+    );
+
+    const batch = bundle.copies[batchIndex];
+
+    if (!batch) {
+      return {
+        message: 'Batch not found',
+      };
+    }
+
+    if (batch.status === 'ALLOTTED') {
+      batch.status = 'INPROGRESS';
+      batch.start_date = format(new Date(), 'yyyy-MM-dd');
+    } else {
+      throw new HttpException('Bundle not allotted', 400);
+    }
+
+    bundle.copies[batchIndex] = batch;
+    bundle.save();
+
+    return {
+      message: 'Bundle accepted successfully',
     };
   }
 }

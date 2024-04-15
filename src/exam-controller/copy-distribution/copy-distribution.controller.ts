@@ -6,12 +6,14 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CopyDistributionService } from './copy-distribution.service';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { ExamContGuard } from '../../guards/cont-guard.guard';
 import { ProgressBundleDto } from './dto/progess-bundle.dto';
+import { TeacherJwtGuard } from '../../guards/teacher-jwt.guard';
 
 @Controller('exam-controller/copy-distribution')
 export class CopyDistributionController {
@@ -41,5 +43,14 @@ export class CopyDistributionController {
   @Patch('progress-bundle')
   async progressBundle(@Body() progressBundleDto: ProgressBundleDto) {
     return this.copyDistributionService.progressBundle(progressBundleDto);
+  }
+
+  @UseGuards(TeacherJwtGuard)
+  @Patch('accept-bundle')
+  async acceptBundle(@Body() progressBundleDto: ProgressBundleDto, @Req() req) {
+    return this.copyDistributionService.acceptBundle(
+      progressBundleDto,
+      req?.user?.id,
+    );
   }
 }

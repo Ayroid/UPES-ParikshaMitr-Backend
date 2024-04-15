@@ -31,12 +31,16 @@ export class CopyBundle {
         program: { type: String, required: true },
         status: {
           type: String,
-          enum: ['ALLOTED', 'INPROGRESS', 'SUBMITTED'],
-          default: 'ALLOTED',
+          enum: ['AVAILABLE', 'ALLOTTED', 'INPROGRESS', 'SUBMITTED'],
+          default: 'AVAILABLE',
+        },
+        available_date: {
+          type: String,
+          default: format(new Date(), 'yyyy-MM-dd'),
         },
         allotted_date: {
           type: String,
-          default: format(new Date(), 'yyyy-MM-dd'),
+          default: null,
         },
         start_date: { type: String, default: null },
         submit_date: { type: String, default: null },
@@ -50,6 +54,7 @@ export class CopyBundle {
       program: string;
       status?: string;
       allotted_date?: string;
+      available_date?: string;
       start_date?: string;
       submit_date?: string;
     },
