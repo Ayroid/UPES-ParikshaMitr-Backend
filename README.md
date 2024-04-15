@@ -45,6 +45,22 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Deploy script
+
+```bash
+# Installing dependencies
+$ npm install
+
+# Installing pm2: https://pm2.keymetrics.io/docs/usage/quick-start/
+$ npm install -g pm2
+
+# Building the app
+$ npm run build
+
+# Running the app
+$ pm2 start pm2.config.js
+```
+
 ## Test
 
 ```bash
