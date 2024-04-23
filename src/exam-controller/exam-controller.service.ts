@@ -82,6 +82,7 @@ export class ExamControllerService {
           return {
             message: 'Login successful',
             token: await this.jwtService.signAsync(payload),
+            role: examControllerData.role,
           };
         } else {
           throw new HttpException(

@@ -13,6 +13,13 @@ export class ExamController {
 
   @Prop()
   password: string;
+
+  @Prop({
+    type: String,
+    enum: ['admin', 'proctor'],
+    default: 'proctor',
+  })
+  role: string;
 }
 
 export const ExamControllerSchema =

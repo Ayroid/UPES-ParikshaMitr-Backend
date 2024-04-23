@@ -265,6 +265,7 @@ export class ContTeacherService {
       return {
         _id: teacher._id,
         teacher: teacher.name,
+        sap_id: teacher.sap_id,
         attendance: [],
       };
     });
