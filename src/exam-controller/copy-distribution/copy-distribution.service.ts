@@ -71,9 +71,9 @@ export class CopyDistributionService {
       'students.subject_code': addBundledto.subjectCode,
     });
 
-    if (rooms.length === 0) {
-      throw new HttpException('Exam not registered in slots', 400);
-    }
+    // if (rooms.length === 0) {
+    //   throw new HttpException('Exam not registered in slots', 400);
+    // }
 
     const prev_bundle = await this.copyBundleModel.findOne({
       date_of_exam: exam_date,
