@@ -53,14 +53,16 @@ export class CopyDistributionService {
       for (const c of bundle.copies) {
         const start_date = c.start_date;
         const available_date = c.available_date;
-        const due_date = start_date
-          ? getWorkingDateAfterDays(new Date(available_date), 7)
+        const due_date = available_date
+          ? getWorkingDateAfterDays(
+              new Date(format(available_date, 'yyyy-MM-dd')),
+              7,
+            )
           : null;
         const day_diff = differenceInDays(
           due_date,
           new Date(format(new Date(), 'yyyy-MM-dd')),
         );
-
         t.copies.push({
           _id: (c as any)._id,
           batch: c.batch,
@@ -76,7 +78,7 @@ export class CopyDistributionService {
           start_date: c.start_date,
           // Due in days (7 working days from start date)
           due_in:
-            start_date && c.status != 'SUBMITTED'
+            available_date && c.status != 'SUBMITTED'
               ? day_diff > 0
                 ? `Due in ${day_diff} days`
                 : day_diff == 0
@@ -84,6 +86,19 @@ export class CopyDistributionService {
                 : `Overdue by ${Math.abs(day_diff)} days`
               : null,
         });
+      }
+
+      const test = bundle.copies.every((c) => {
+        if (c.submit_date == null) {
+          return false;
+        }
+        if (differenceInDays(new Date(c.submit_date), new Date()) < -7) {
+          return true;
+        }
+        return false;
+      });
+      if (test) {
+        continue;
       }
       res_obj.push(t);
     }
