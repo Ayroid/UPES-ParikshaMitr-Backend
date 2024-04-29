@@ -50,8 +50,9 @@ export class CopyDistributionService {
       };
       for (const c of bundle.copies) {
         const start_date = c.start_date;
+        const available_date = c.available_date;
         const due_date = start_date
-          ? getWorkingDateAfterDays(new Date(start_date), 7)
+          ? getWorkingDateAfterDays(new Date(available_date), 7)
           : null;
         const day_diff = differenceInDays(
           due_date,

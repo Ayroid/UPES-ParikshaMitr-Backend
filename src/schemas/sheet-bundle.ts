@@ -45,11 +45,11 @@ export class CopyBundle {
           default: () => new Date(),
         },
         allotted_date: {
-          type: String,
+          type: Date,
           default: null,
         },
-        start_date: { type: String, default: null },
-        submit_date: { type: String, default: null },
+        start_date: { type: Date, default: null },
+        submit_date: { type: Date, default: null },
       },
     ],
   })
@@ -59,10 +59,10 @@ export class CopyBundle {
       no_of_students: number;
       program: string;
       status?: string;
-      allotted_date?: string;
-      available_date?: string;
-      start_date?: string;
-      submit_date?: string;
+      allotted_date?: Date;
+      available_date?: Date;
+      start_date?: Date;
+      submit_date?: Date;
     },
   ];
 }
