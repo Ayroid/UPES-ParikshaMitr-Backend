@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -43,6 +44,15 @@ export class CopyDistributionController {
   @Patch('progress-bundle')
   async progressBundle(@Body() progressBundleDto: ProgressBundleDto) {
     return this.copyDistributionService.progressBundle(progressBundleDto);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Delete('delete-bundle')
+  async deleteBundle(
+    @Query('bundle_id') id: string,
+    @Query('batch') batch: string,
+  ) {
+    return this.copyDistributionService.deleteBundle(id, batch);
   }
 
   @UseGuards(TeacherJwtGuard)

@@ -309,4 +309,31 @@ export class CopyDistributionService {
       message: 'Bundle accepted successfully',
     };
   }
+  // #region Delete Bundle
+
+  async deleteBundle(id: string, batch: string) {
+    const bundle = await this.copyBundleModel.findById(id);
+
+    if (!bundle) {
+      return {
+        message: 'Bundle not found',
+      };
+    }
+
+    const batchIndex = bundle.copies.findIndex((copy) => copy.batch === batch);
+
+    if (batchIndex === -1) {
+      return {
+        message: 'Batch not found',
+      };
+    }
+
+    bundle.copies.splice(batchIndex, 1);
+
+    bundle.save();
+
+    return {
+      message: 'Bundle deleted successfully',
+    };
+  }
 }
