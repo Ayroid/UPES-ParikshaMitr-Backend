@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AddBundlesDto {
   @IsString()
@@ -13,14 +13,20 @@ export class AddBundlesDto {
   @IsString()
   evaluatorName: string;
 
-  @IsString()
-  evaluatorSchool: string;
+  // @IsString()
+  // evaluatorSchool: string;
 
   @IsString()
   subjectCode: string;
 
   @IsString()
   subjectName: string;
+
+  @IsString()
+  subjectSchool: string;
+
+  @IsNumber()
+  roomNo: number;
 
   @IsString()
   noOfStudents: string;

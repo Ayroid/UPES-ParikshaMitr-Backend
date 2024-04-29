@@ -78,6 +78,7 @@ export class CopyDistributionService {
     const prev_bundle = await this.copyBundleModel.findOne({
       date_of_exam: exam_date,
       subject_code: addBundledto.subjectCode,
+      subject_school: addBundledto.subjectSchool,
       evaluator: teacher._id,
     });
 
@@ -108,6 +109,8 @@ export class CopyDistributionService {
         evaluator: teacher._id,
         subject_code: addBundledto.subjectCode,
         subject_name: addBundledto.subjectName,
+        subject_school: addBundledto.subjectSchool,
+        room_no: addBundledto.roomNo,
         copies: [
           {
             batch: addBundledto.batch,

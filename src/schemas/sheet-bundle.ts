@@ -23,6 +23,12 @@ export class CopyBundle {
   @Prop({ required: true })
   subject_name: string;
 
+  @Prop({ required: true })
+  subject_school: string;
+
+  @Prop({ required: true })
+  room_no: number;
+
   @Prop({
     type: [
       {
@@ -35,8 +41,8 @@ export class CopyBundle {
           default: 'AVAILABLE',
         },
         available_date: {
-          type: String,
-          default: format(new Date(), 'yyyy-MM-dd'),
+          type: Date,
+          default: () => new Date(),
         },
         allotted_date: {
           type: String,
