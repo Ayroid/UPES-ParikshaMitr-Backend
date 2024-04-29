@@ -46,6 +46,8 @@ export class CopyDistributionService {
         evaluation_mode: bundle.evaluation_mode,
         subject_code: bundle.subject_code,
         subject_name: bundle.subject_name,
+        subject_school: bundle.subject_school,
+        room_no: bundle.room_no,
         copies: [],
       };
       for (const c of bundle.copies) {
