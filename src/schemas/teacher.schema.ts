@@ -40,6 +40,18 @@ export class Teacher {
   })
   email: string;
 
+  @Prop({
+    validate: {
+      validator: function (v: string) {
+        const accepted_schools = ['SOHST', 'SOCS', 'SOE', 'SOD'];
+        return accepted_schools.includes(v);
+      },
+      message: (props) => `${props.value} is not a registered school!`,
+    },
+    default: 'SOHST',
+  })
+  school: string;
+
   @Prop({ default: false })
   approved: boolean;
 }
