@@ -25,9 +25,7 @@ export class CopyDistributionService {
       sap_id: addBundledto.evaluatorSap,
     });
     if (!teacher) {
-      return {
-        message: 'Teacher not found',
-      };
+      throw new HttpException('Teacher not found', 400);
     }
 
     const regex = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
