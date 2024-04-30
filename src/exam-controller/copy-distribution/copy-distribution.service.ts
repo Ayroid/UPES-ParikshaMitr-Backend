@@ -20,7 +20,7 @@ export class CopyDistributionService {
   ) {}
 
   //#region Add New Bundles
-  async addBundles(addBundledto: AddBundlesDto) {
+  async addBundles(addBundledto: AddBundlesDto, cont_id: string) {
     const teacher = await this.teacherModel.findOne({
       sap_id: addBundledto.evaluatorSap,
     });
@@ -97,6 +97,7 @@ export class CopyDistributionService {
         batch: addBundledto.batch,
         no_of_students: parseInt(addBundledto.noOfStudents),
         program: addBundledto.program,
+        distibuter: cont_id,
       };
       prev_bundle.copies.push({
         ...copy,
@@ -116,6 +117,7 @@ export class CopyDistributionService {
             batch: addBundledto.batch,
             no_of_students: addBundledto.noOfStudents,
             program: addBundledto.program,
+            distibuter: cont_id,
           },
         ],
       });
@@ -177,7 +179,7 @@ export class CopyDistributionService {
       for (const c of bundle.copies) {
         const start_date = c.start_date;
         const available_date = c.available_date;
-        const due_date = start_date
+        const due_date = available_date
           ? getWorkingDateAfterDays(new Date(available_date), 7)
           : null;
         const day_diff = differenceInDays(
@@ -202,7 +204,7 @@ export class CopyDistributionService {
           available_date: c.available_date,
           // Due in days (7 working days from start date)
           due_in:
-            start_date && c.status != 'SUBMITTED'
+            available_date && c.status != 'SUBMITTED'
               ? day_diff > 0
                 ? `Due in ${day_diff} days`
                 : day_diff == 0

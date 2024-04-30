@@ -24,8 +24,11 @@ export class CopyDistributionController {
 
   @UseGuards(ExamContGuard)
   @Post('add-bundles')
-  async addBundles(@Body() addBundlesDto: AddBundlesDto) {
-    return this.copyDistributionService.addBundles(addBundlesDto);
+  async addBundles(@Body() addBundlesDto: AddBundlesDto, @Req() req) {
+    return this.copyDistributionService.addBundles(
+      addBundlesDto,
+      req?.user?.id,
+    );
   }
 
   @UseGuards(ExamContGuard)

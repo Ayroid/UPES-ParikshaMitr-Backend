@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { format } from 'date-fns';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Mongoose } from 'mongoose';
 
 export type CopyBundleDocument = HydratedDocument<CopyBundle>;
 
@@ -50,6 +50,10 @@ export class CopyBundle {
         },
         start_date: { type: Date, default: null },
         submit_date: { type: Date, default: null },
+        distibuter: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'ExamController',
+        },
       },
     ],
   })
@@ -63,6 +67,7 @@ export class CopyBundle {
       available_date?: Date;
       start_date?: Date;
       submit_date?: Date;
+      distibuter?: string;
     },
   ];
 }
