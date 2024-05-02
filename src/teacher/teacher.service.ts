@@ -268,6 +268,7 @@ export class TeacherService {
       return {
         message: 'Teacher found',
         data: {
+          school: teacher.school,
           sap_id: teacher.sap_id,
           name: teacher.name,
           phone: teacher.phone,
