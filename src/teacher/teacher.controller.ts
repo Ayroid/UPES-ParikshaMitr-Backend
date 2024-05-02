@@ -67,6 +67,12 @@ export class TeacherController {
     return this.teacherService.findAll();
   }
 
+  @UseGuards(TeacherJwtGuard)
+  @Get('getTeacherDetails')
+  getTeacherDetails(@Req() req) {
+    return this.teacherService.getTeacherDetails(req?.user?.id);
+  }
+
   @Get('/find/:id')
   findOne(@Param('id') id: string) {
     return this.teacherService.findOne(id);
