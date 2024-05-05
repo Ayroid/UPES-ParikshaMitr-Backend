@@ -262,6 +262,30 @@ export class TeacherService {
     }
   }
 
+  async getTeacherDetails(id: string) {
+    try {
+      const teacher = await this.teacherModel.findById(id).exec();
+      return {
+        message: 'Teacher found',
+        data: {
+          school: teacher.school,
+          sap_id: teacher.sap_id,
+          name: teacher.name,
+          phone: teacher.phone,
+          email: teacher.email,
+          approved: teacher.approved,
+        },
+      };
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: 'Teacher not found',
+        },
+        404,
+      );
+    }
+  }
+
   async getNotifications() {
     try {
       const notifications = await this.notificationModel
