@@ -54,6 +54,9 @@ export class CopyBundle {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'ExamController',
         },
+        answersheet: { type: Boolean, default: false },
+        award_softcopy: { type: Boolean, default: false },
+        award_hardcopy: { type: Boolean, default: false },
       },
     ],
   })
@@ -68,6 +71,9 @@ export class CopyBundle {
       start_date?: Date;
       submit_date?: Date;
       distibuter?: string;
+      answersheet?: boolean;
+      award_softcopy?: boolean;
+      award_hardcopy?: boolean;
     },
   ];
 }

@@ -13,7 +13,10 @@ import {
 import { CopyDistributionService } from './copy-distribution.service';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { ExamContGuard } from '../../guards/cont-guard.guard';
-import { ProgressBundleDto } from './dto/progess-bundle.dto';
+import {
+  BatchSubmitUpdateDto,
+  ProgressBundleDto,
+} from './dto/progess-bundle.dto';
 import { TeacherJwtGuard } from '../../guards/teacher-jwt.guard';
 
 @Controller('exam-controller/copy-distribution')
@@ -41,6 +44,12 @@ export class CopyDistributionController {
   @Get('bundle-by-id')
   async getBundle(@Query('bundle_id') id: string) {
     return this.copyDistributionService.getBundle(id);
+  }
+
+  @UseGuards(ExamContGuard)
+  @Patch('batch-submit-update')
+  async batchSubmitUpdate(@Body() batchSubmitUpdateDto: BatchSubmitUpdateDto) {
+    return this.copyDistributionService.batchSubmitUpdate(batchSubmitUpdateDto);
   }
 
   @UseGuards(ExamContGuard)

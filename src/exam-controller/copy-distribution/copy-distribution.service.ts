@@ -5,7 +5,10 @@ import { Model } from 'mongoose';
 import { Teacher, TeacherDocument } from '../../schemas/teacher.schema';
 import { AddBundlesDto } from './dto/add-bundles.dto';
 import { addDays, differenceInDays, format, isSunday } from 'date-fns';
-import { ProgressBundleDto } from './dto/progess-bundle.dto';
+import {
+  BatchSubmitUpdateDto,
+  ProgressBundleDto,
+} from './dto/progess-bundle.dto';
 import { Slot, SlotDocument } from '../../schemas/slot.schema';
 import { Room, RoomDocument } from '../../schemas/room.schema';
 
@@ -154,6 +157,7 @@ export class CopyDistributionService {
       const bundle = await this.copyBundleModel
         .findById(id)
         .populate('evaluator')
+        .populate('copies.distibuter')
         .exec();
 
       const res_obj = [];
@@ -209,6 +213,10 @@ export class CopyDistributionService {
                 ? 'Due Today'
                 : `Overdue by ${Math.abs(day_diff)} days`
               : null,
+          distibuter: (c.distibuter as any)?.name,
+          answersheet: c.answersheet,
+          award_softcopy: c.award_softcopy,
+          award_hardcopy: c.award_hardcopy,
         });
       }
       res_obj.push(t);
@@ -336,6 +344,44 @@ export class CopyDistributionService {
 
     return {
       message: 'Bundle deleted successfully',
+    };
+  }
+
+  //#region Batch Submit Update
+  async batchSubmitUpdate(batchSubmitUpdateDto: BatchSubmitUpdateDto) {
+    const bundle = await this.copyBundleModel.findById(
+      batchSubmitUpdateDto.bundle_id,
+    );
+
+    if (!bundle) {
+      return {
+        message: 'Bundle not found',
+      };
+    }
+
+    const batchIndex = bundle.copies.findIndex(
+      (copy) =>
+        copy.batch === batchSubmitUpdateDto.batch &&
+        copy.program === batchSubmitUpdateDto.program,
+    );
+
+    const batch = bundle.copies[batchIndex];
+
+    if (!batch) {
+      return {
+        message: 'Batch not found',
+      };
+    }
+
+    batch.answersheet = batchSubmitUpdateDto.answersheet;
+    batch.award_softcopy = batchSubmitUpdateDto.award_softcopy;
+    batch.award_hardcopy = batchSubmitUpdateDto.award_hardcopy;
+
+    bundle.copies[batchIndex] = batch;
+    bundle.save();
+
+    return {
+      message: 'Batch updated successfully',
     };
   }
 }
