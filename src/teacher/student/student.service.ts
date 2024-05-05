@@ -23,14 +23,21 @@ export class StudentService {
         ans_sheet_number = ans_sheet_number.toUpperCase();
         room = await this.roomModel
           .findOne(
-            { 'students.ans_sheet_number': ans_sheet_number },
+            {
+              $or: [
+                { 'students.ans_sheet_number': ans_sheet_number },
+                { 'students.new_ans_sheet_number': ans_sheet_number },
+              ],
+            },
             {
               students: {
-                $elemMatch: { ans_sheet_number },
+                $elemMatch: {
+                  $or: [
+                    { ans_sheet_number },
+                    { new_ans_sheet_number: ans_sheet_number },
+                  ],
+                },
               },
-              room_no: 1,
-              room_invigilator_id: 1,
-              block: 1,
             },
           )
           .populate({
@@ -55,47 +62,55 @@ export class StudentService {
               },
             ],
           });
+        if (!room) {
+          throw new HttpException('Student not found', 404);
+        }
         if (room.length === 0) {
           throw new HttpException('Student not found', 404);
         }
       }
 
-      const res: any[] = [
-        ...room.map((room) =>
-          room.students.map((student) => {
-            return {
-              _id: room._id,
-              room_no: room.room_no,
-              block: room.block,
-              invigilator1: room.room_invigilator_id.invigilator1_id,
-              invigilator2: room.room_invigilator_id.invigilator2_id,
-              invigilator3: room.room_invigilator_id.invigilator3_id,
-              student: student,
-            };
-          }),
-        ),
-      ].flat();
-
-      for (const r of res) {
-        const slot = await this.slotModel.findOne(
-          { rooms: r._id },
-          'date timeSlot type',
-        );
-        r.slot = slot;
-      }
-
       return {
         message: 'Student found',
-        data: {
-          sap_id: res[0]?.student?.sap_id,
-          ans_sheet_number: res[0]?.student?.ans_sheet_number,
-          name: res[0]?.student?.student_name,
-          a: 'X',
-          rooms: res.sort((a, b) =>
-            new Date(a.slot.date) < new Date(b.slot.date) ? 1 : -1,
-          ),
-        },
+        data: room.students[0],
       };
+
+      // const res: any[] = [
+      //   ...room.map((room) =>
+      //     room.students.map((student) => {
+      //       return {
+      //         _id: room._id,
+      //         room_no: room.room_no,
+      //         block: room.block,
+      //         invigilator1: room.room_invigilator_id.invigilator1_id,
+      //         invigilator2: room.room_invigilator_id.invigilator2_id,
+      //         invigilator3: room.room_invigilator_id.invigilator3_id,
+      //         student: student,
+      //       };
+      //     }),
+      //   ),
+      // ].flat();
+
+      // for (const r of res) {
+      //   const slot = await this.slotModel.findOne(
+      //     { rooms: r._id },
+      //     'date timeSlot type',
+      //   );
+      //   r.slot = slot;
+      // }
+
+      // return {
+      //   message: 'Student found',
+      //   data: {
+      //     sap_id: res[0]?.student?.sap_id,
+      //     ans_sheet_number: res[0]?.student?.ans_sheet_number,
+      //     name: res[0]?.student?.student_name,
+      //     a: 'X',
+      //     rooms: res.sort((a, b) =>
+      //       new Date(a.slot.date) < new Date(b.slot.date) ? 1 : -1,
+      //     ),
+      //   },
+      // };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -108,7 +123,7 @@ export class StudentService {
   async getStudentAttendanceBySapId(sap_id: string) {
     try {
       if (!sap_id) {
-        throw new HttpException('SAP ID or Roll No is required', 400);
+        throw new HttpException('SAP ID is required', 400);
       }
       let room;
       if (sap_id) {
@@ -186,10 +201,22 @@ export class StudentService {
           sap_id: res[0]?.student?.sap_id,
           roll_no: res[0]?.student?.roll_no,
           name: res[0]?.student?.student_name,
-          a: 'X',
-          rooms: res.sort((a, b) =>
-            new Date(a.slot.date) < new Date(b.slot.date) ? 1 : -1,
-          ),
+          rooms: res
+            .sort((a, b) =>
+              new Date(a.slot.date) < new Date(b.slot.date) ? 1 : -1,
+            )
+            .map((r) => {
+              return {
+                // slot: r.slot,
+                date: r.slot.date,
+                timeSlot: r.slot.timeSlot,
+                room_no: r.room_no,
+                subject_code: r.student.subject_code,
+                subject_name: r.student.subject_name,
+                ans_sheet_number: r.student.ans_sheet_number,
+                attendance: r.student.attendance,
+              };
+            }),
         },
       };
     } catch (err) {
